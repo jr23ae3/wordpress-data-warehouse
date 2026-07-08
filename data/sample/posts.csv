@@ -1,0 +1,3 @@
+id,date_gmt,slug,status,link,author_id,title,category_ids,comment_status
+101,2026-07-01T08:00:00,/growth-playbook,publish,https://example.com/growth-playbook,11,Growth Playbook,"2,5",open
+102,2026-07-02T09:15:00,/seo-basics,publish,https://example.com/seo-basics,12,SEO Basics,"3",open

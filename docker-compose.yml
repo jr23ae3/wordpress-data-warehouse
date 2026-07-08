@@ -10,12 +10,74 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./sql/init:/docker-entrypoint-initdb.d
+
+  python-etl:
+    build:
+      context: .
+      dockerfile: etl/Dockerfile
+    container_name: wordpress_data_warehouse_etl
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: warehouse
+      POSTGRES_USER: etl
+      POSTGRES_PASSWORD: etl
+      WP_BASE_URL: https://wordpress.org/news
+      WP_MAX_PAGES: 3
+      WP_PER_PAGE: 50
+    depends_on:
+      - postgres
+
+  airflow:
+    build:
+      context: .
+      dockerfile: airflow/Dockerfile
+    container_name: wordpress_data_warehouse_airflow
+    env_file:
+      - ./airflow/.env
+    environment:
+      AIRFLOW__CORE__EXECUTOR: LocalExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://etl:etl@postgres:5432/warehouse
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "false"
+      AIRFLOW__CORE__LOAD_EXAMPLES: "false"
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: warehouse
+      POSTGRES_USER: etl
+      POSTGRES_PASSWORD: etl
+      WP_BASE_URL: https://wordpress.org/news
+      WP_MAX_PAGES: 3
+      WP_PER_PAGE: 50
+    command: >
+      bash -c "
+      airflow db migrate &&
+      airflow users create --username admin --password admin --firstname Data --lastname Eng --role Admin --email admin@example.com || true &&
+      airflow standalone
+      "
+    volumes:
+      - ./airflow/dags:/opt/airflow/dags
+      - ./airflow/logs:/opt/airflow/logs
+      - ./airflow/plugins:/opt/airflow/plugins
+      - ./:/opt/pipeline
+    ports:
+      - "8081:8080"
+    depends_on:
+      - postgres
 
   adminer:
     image: adminer:4
     container_name: wordpress_data_warehouse_adminer
     ports:
       - "8080:8080"
+    depends_on:
+      - postgres
+
+  metabase:
+    image: metabase/metabase:v0.50.29
+    container_name: wordpress_data_warehouse_metabase
+    ports:
+      - "3001:3000"
     depends_on:
       - postgres
 

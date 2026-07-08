@@ -3,6 +3,7 @@
 Add project screenshots to this directory.
 
 Suggested files:
-- architecture-overview.png
-- pipeline-run.png
-- dashboard-preview.png
+- airflow-dag-run.png
+- pipeline-kpis-dashboard.png
+- top-posts-traffic-dashboard.png
+- comments-activity-chart.png

@@ -1,0 +1,3 @@
+id,post_id,parent_id,author_name,date_gmt,status
+9001,101,0,Reader A,2026-07-03T10:00:00,approved
+9002,102,0,Reader B,2026-07-03T11:10:00,approved
